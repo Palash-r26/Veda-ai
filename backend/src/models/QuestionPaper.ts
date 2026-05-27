@@ -16,6 +16,7 @@ export interface ISection {
 
 export interface IQuestionPaper extends Document {
   assignmentId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
   sections: ISection[];
   // Token & performance tracking
   promptTokens: number;
@@ -51,6 +52,7 @@ const SectionSchema: Schema = new Schema(
 
 const QuestionPaperSchema: Schema = new Schema({
   assignmentId: { type: Schema.Types.ObjectId, ref: 'Assignment', required: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   sections: { type: [SectionSchema], required: true },
 
   // ── Cost & Token Tracking ─────────────────────────────────────────────────

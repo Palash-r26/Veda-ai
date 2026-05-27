@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAssignmentStore } from '../store/useAssignmentStore';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 /**
  * SocketProvider — establishes ONE socket connection for the app lifetime.
@@ -43,19 +44,11 @@ export default function SocketProvider({ children }: { children: React.ReactNode
     if (!socket) return;
 
     // Remove previous listeners to avoid duplicates
-    socket.off('job-update');
     socket.off('job-progress');
     socket.off('job-complete');
-    socket.off('job-failed');
     socket.off('job-error');
 
     if (!currentJobId) return; // no active job — don't register
-
-    const handleUpdate = (data: { jobId: string; status: string; assignmentId: string }) => {
-      if (data.jobId === currentJobId) {
-        setJobStatus(data.status as 'pending' | 'processing' | 'completed' | 'failed', data.jobId, data.assignmentId);
-      }
-    };
 
     const handleProgress = (data: { jobId: string; message: string; step: number; assignmentId: string }) => {
       if (data.jobId === currentJobId) {
@@ -66,37 +59,30 @@ export default function SocketProvider({ children }: { children: React.ReactNode
     const handleComplete = (data: { jobId: string; paperId: string }) => {
       if (data.jobId === currentJobId) {
         setCompleted(data.paperId);
+        toast.success('Paper generated successfully!');
         router.push(`/output/${data.paperId}`);
-      }
-    };
-
-    const handleFailed = (data: { jobId: string; assignmentId: string }) => {
-      if (data.jobId === currentJobId) {
-        setJobStatus('failed', data.jobId, data.assignmentId);
       }
     };
 
     const handleError = (data: { jobId: string; message: string; assignmentId: string }) => {
       if (data.jobId === currentJobId) {
         setError(data.message);
+        setJobStatus('failed', data.jobId, data.assignmentId);
+        toast.error(`Generation failed: ${data.message}`);
       }
     };
 
-    socket.on('job-update', handleUpdate);
     socket.on('job-progress', handleProgress);
     socket.on('job-complete', handleComplete);
-    socket.on('job-failed', handleFailed);
     socket.on('job-error', handleError);
 
     // Cleanup listeners when jobId changes or component unmounts
     return () => {
-      socket.off('job-update', handleUpdate);
       socket.off('job-progress', handleProgress);
       socket.off('job-complete', handleComplete);
-      socket.off('job-failed', handleFailed);
       socket.off('job-error', handleError);
     };
-  }, [currentJobId, setCompleted, setJobStatus, router]);
+  }, [currentJobId, setCompleted, setJobStatus, setProgress, setError, router]);
 
   return <>{children}</>;
 }

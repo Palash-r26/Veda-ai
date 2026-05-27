@@ -5,6 +5,7 @@ import { Assignment } from '../models/Assignment';
 import { QuestionPaper } from '../models/QuestionPaper';
 import { PaperSchema } from '../schemas/paperSchema';
 import { selectRelevantChunks, buildRagContext } from '../utils/textChunker';
+import { buildPrompt } from '../ai/prompts';
 import { io } from '../index';
 import { connection, deadLetterQueue } from './queue';
 import dotenv from 'dotenv';
@@ -19,60 +20,7 @@ function emitProgress(jobId: string | undefined, assignmentId: string, message: 
   io.emit('job-progress', { jobId, assignmentId, message, step });
 }
 
-// ─── Prompt builder ───────────────────────────────────────────────────────────
-function buildPrompt(assignment: any, ragContext: string): string {
-  const ragBlock = ragContext
-    ? `\nSOURCE MATERIAL — base your questions STRICTLY on this content:\n"""\n${ragContext}\n"""\n`
-    : '';
-
-  return `You are an expert AI assessment creator. Generate a structured question paper.
-${ragBlock}
-Teacher's instructions: ${assignment.instructions || 'None'}
-Question types required: ${assignment.questionTypes.join(', ')}
-Number of questions: ${assignment.numberOfQuestions}
-Total marks: ${assignment.totalMarks}
-
-STRICT RULES:
-- Marks across ALL sections must sum to EXACTLY ${assignment.totalMarks}
-- Spread difficulty: include Easy, Moderate, and Hard questions
-- Group by question type into sections (Section A, Section B…)
-- No repeated question ideas
-${ragContext ? '- Questions MUST be based on the source material above' : ''}
-
-Return ONLY valid JSON — no markdown, no code fences:
-{
-  "sections": [
-    {
-      "title": "Section A: Multiple Choice Questions",
-      "instructions": "Attempt all questions. Each carries N marks.",
-      "questions": [
-        { "text": "Full question text", "difficulty": "Easy", "marks": 2 }
-      ]
-    }
-  ]
-}`;
-}
-
-// ─── Single question regeneration prompt ──────────────────────────────────────
-export function buildSingleQuestionPrompt(
-  sectionTitle: string,
-  questionTypes: string[],
-  totalMarks: number,
-  ragContext: string
-): string {
-  const ragBlock = ragContext
-    ? `\nSOURCE MATERIAL:\n"""\n${ragContext}\n"""\n`
-    : '';
-
-  return `You are an expert AI assessment creator.${ragBlock}
-Generate exactly ONE new question for the section: "${sectionTitle}"
-Question type: ${questionTypes.join(', ')}
-Marks for this question: ${totalMarks}
-
-Return ONLY valid JSON — no markdown, no fences:
-{ "text": "The question text", "difficulty": "Easy", "marks": ${totalMarks} }`;
-}
-
+// Prompt builders have been extracted to ai/prompts.ts
 // ─── Validate + parse LLM JSON output ────────────────────────────────────────
 function parseAndValidate(raw: string) {
   const cleaned = raw.trim().replace(/^```json\s*|^```\s*|```$/gm, '');
@@ -113,7 +61,7 @@ export const generationWorker = new Worker(
     let response;
     try {
       response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-2.5-flash',
         contents: prompt,
         config: { responseMimeType: 'application/json' },
       });
@@ -152,6 +100,7 @@ export const generationWorker = new Worker(
     // ── Step 6: Save to DB ────────────────────────────────────────────────────
     const paper = new QuestionPaper({
       assignmentId,
+      userId: assignment.userId,
       sections: validatedData.sections,
       promptTokens,
       completionTokens,

@@ -6,6 +6,7 @@ import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSo
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
 import RegenerateButton from './RegenerateButton';
+import { useAuthStore } from '@/store/useAuthStore';
 
 // ─── Sortable Question Component ──────────────────────────────────────────────
 function SortableQuestion({ 
@@ -81,6 +82,7 @@ export default function DraggablePaper({ paper, setPaper, onError }: DraggablePa
   // Format: "secIdx-qIdx-random"
   const [items, setItems] = useState<any[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const { token } = useAuthStore();
 
   useEffect(() => {
     if (!paper) return;
@@ -196,7 +198,10 @@ export default function DraggablePaper({ paper, setPaper, onError }: DraggablePa
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const res = await fetch(`${API_URL}/api/papers/${paper._id}/reorder`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
         body: JSON.stringify(payload)
       });
       const data = await res.json();

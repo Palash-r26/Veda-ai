@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface RegenerateButtonProps {
   paperId: string;
@@ -13,6 +14,7 @@ interface RegenerateButtonProps {
 
 export default function RegenerateButton({ paperId, sectionIndex, questionIndex, onSuccess, onError }: RegenerateButtonProps) {
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const { token } = useAuthStore();
 
   const handleRegenerate = async () => {
     setIsRegenerating(true);
@@ -20,7 +22,10 @@ export default function RegenerateButton({ paperId, sectionIndex, questionIndex,
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const res = await fetch(`${API_URL}/api/papers/${paperId}/regenerate-question`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
         body: JSON.stringify({ sectionIndex, questionIndex }),
       });
 

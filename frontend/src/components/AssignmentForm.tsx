@@ -3,12 +3,15 @@
 import { useState, useRef } from 'react';
 import { useAssignmentStore } from '../store/useAssignmentStore';
 import { ArrowLeft, Loader2, Paperclip, X, UploadCloud, Check } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useAuthStore } from '../store/useAuthStore';
 
 const QUESTION_TYPE_OPTIONS = ['Multiple Choice', 'Short Answer', 'Long Answer', 'True/False'];
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function AssignmentForm({ onCancel }: { onCancel: () => void }) {
   const { status, setJobStatus, progressMessage, progressStep, errorMessage } = useAssignmentStore();
+  const { token } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Stepper state
@@ -28,11 +31,11 @@ export default function AssignmentForm({ onCancel }: { onCancel: () => void }) {
   const acceptFile = (file: File) => {
     const allowed = ['application/pdf', 'text/plain', 'image/png', 'image/jpeg', 'image/jpg'];
     if (!allowed.includes(file.type)) {
-      alert('Only PDF, TXT, PNG, or JPG files are allowed.');
+      toast.error('Only PDF, TXT, PNG, or JPG files are allowed.');
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      alert('File must be under 10 MB.');
+      toast.error('File must be under 10 MB.');
       return;
     }
     setUploadedFile(file);
@@ -50,10 +53,12 @@ export default function AssignmentForm({ onCancel }: { onCancel: () => void }) {
     e.preventDefault();
 
     // Validation
-    if (!formData.dueDate) { alert('Please select a due date.'); return; }
-    if (formData.questionTypes.length === 0) { alert('Select at least one question type.'); return; }
-    if (formData.numberOfQuestions < 1) { alert('Number of questions must be at least 1.'); return; }
-    if (formData.totalMarks < 1) { alert('Total marks must be at least 1.'); return; }
+    if (!formData.dueDate) { toast.error('Please select a due date.'); return; }
+    if (formData.questionTypes.length === 0) { toast.error('Select at least one question type.'); return; }
+    if (formData.numberOfQuestions < 1) { toast.error('Number of questions must be at least 1.'); return; }
+    if (formData.totalMarks < 1) { toast.error('Total marks must be at least 1.'); return; }
+
+    if (!token) { toast.error('Authentication required.'); return; }
 
     try {
       setJobStatus('pending', '', '');
@@ -68,20 +73,22 @@ export default function AssignmentForm({ onCancel }: { onCancel: () => void }) {
 
       const res = await fetch(`${API_URL}/api/assignments`, {
         method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
         body,
       });
 
       const data = await res.json();
       if (data.success) {
         setJobStatus('processing', data.jobId, data.assignment._id);
+        toast.success('Assignment created. Generating paper...');
       } else {
         setJobStatus('failed', '', '');
-        alert(data.error || 'Failed to generate assignment.');
+        toast.error(data.error || 'Failed to generate assignment.');
       }
     } catch (err) {
       console.error(err);
       setJobStatus('failed', '', '');
-      alert('Network error — is the backend running?');
+      toast.error('Network error — is the backend running?');
     }
   };
 

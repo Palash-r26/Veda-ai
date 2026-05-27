@@ -6,7 +6,8 @@ import { QuestionPaper } from '../models/QuestionPaper';
 import { Assignment } from '../models/Assignment';
 import { SingleQuestionSchema, ReorderPayloadSchema } from '../schemas/paperSchema';
 import { selectRelevantChunks, buildRagContext } from '../utils/textChunker';
-import { buildSingleQuestionPrompt } from '../queue/worker';
+import { buildSingleQuestionPrompt } from '../ai/prompts';
+import { requireAuth, AuthRequest } from '../middleware/auth';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -15,15 +16,22 @@ const router = Router();
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // ─── GET /api/papers/:id ───────────────────────────────────────────────────────
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const id = req.params.id as string;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ success: false, error: 'Invalid paper ID' });
     }
 
-    const paper = await QuestionPaper.findById(id);
+    const paper = await QuestionPaper.findOne({
+      $or: [
+        { _id: id },
+        { assignmentId: id }
+      ]
+    });
+    
     if (!paper) return res.status(404).json({ success: false, error: 'Paper not found' });
+    if (paper.userId.toString() !== req.user!.id) return res.status(403).json({ success: false, error: 'Forbidden' });
 
     const assignment = await Assignment.findById(paper.assignmentId);
     res.json({ success: true, paper, assignment });
@@ -35,7 +43,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 
 // ─── POST /api/papers/:id/regenerate-question ──────────────────────────────────
 // Micro-regenerate: swap out one question without re-running the full paper
-router.post('/:id/regenerate-question', async (req: Request, res: Response) => {
+router.post('/:id/regenerate-question', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const paperId = req.params.id as string;
     if (!mongoose.Types.ObjectId.isValid(paperId)) {
@@ -53,6 +61,7 @@ router.post('/:id/regenerate-question', async (req: Request, res: Response) => {
 
     const paper = await QuestionPaper.findById(paperId);
     if (!paper) return res.status(404).json({ success: false, error: 'Paper not found' });
+    if (paper.userId.toString() !== req.user!.id) return res.status(403).json({ success: false, error: 'Forbidden' });
 
     const section = paper.sections[sectionIndex];
     if (!section) return res.status(400).json({ success: false, error: `Section ${sectionIndex} does not exist` });
@@ -82,7 +91,7 @@ router.post('/:id/regenerate-question', async (req: Request, res: Response) => {
     let response;
     try {
       response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-2.5-flash',
         contents: prompt,
         config: { responseMimeType: 'application/json' },
       });
@@ -116,7 +125,7 @@ router.post('/:id/regenerate-question', async (req: Request, res: Response) => {
 
 // ─── PATCH /api/papers/:id/reorder ────────────────────────────────────────────
 // Persist DnD reorder: accepts the full sections array with questions in new order
-router.patch('/:id/reorder', async (req: Request, res: Response) => {
+router.patch('/:id/reorder', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const paperId = req.params.id as string;
     if (!mongoose.Types.ObjectId.isValid(paperId)) {
@@ -136,6 +145,7 @@ router.patch('/:id/reorder', async (req: Request, res: Response) => {
 
     const paper = await QuestionPaper.findById(paperId);
     if (!paper) return res.status(404).json({ success: false, error: 'Paper not found' });
+    if (paper.userId.toString() !== req.user!.id) return res.status(403).json({ success: false, error: 'Forbidden' });
 
     // Replace sections with reordered content
     paper.sections = payload.sections as any;

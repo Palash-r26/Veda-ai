@@ -9,6 +9,7 @@ import { Assignment } from '../models/Assignment';
 import { QuestionPaper } from '../models/QuestionPaper';
 import { generationQueue } from '../queue/queue';
 import { chunkText } from '../utils/textChunker';
+import { requireAuth, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
@@ -61,7 +62,7 @@ async function extractTextFromFile(filePath: string, originalName: string): Prom
 }
 
 // ─── POST /api/assignments ─────────────────────────────────────────────────────
-router.post('/', upload.single('file'), async (req: Request, res: Response) => {
+router.post('/', requireAuth, upload.single('file'), async (req: AuthRequest, res: Response) => {
   try {
     const { dueDate, questionTypes, numberOfQuestions, totalMarks, instructions } = req.body;
 
@@ -100,6 +101,7 @@ router.post('/', upload.single('file'), async (req: Request, res: Response) => {
     }
 
     const assignment = new Assignment({
+      userId: req.user!.id,
       dueDate,
       questionTypes: parsedTypes,
       numberOfQuestions: numQ,
@@ -131,9 +133,9 @@ router.post('/', upload.single('file'), async (req: Request, res: Response) => {
 });
 
 // ─── GET /api/assignments ──────────────────────────────────────────────────────
-router.get('/', async (_req: Request, res: Response) => {
+router.get('/', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const assignments = await Assignment.find().sort({ createdAt: -1 });
+    const assignments = await Assignment.find({ userId: req.user!.id }).sort({ createdAt: -1 });
     res.json({ success: true, assignments });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to fetch assignments' });
@@ -141,10 +143,13 @@ router.get('/', async (_req: Request, res: Response) => {
 });
 
 // ─── GET /api/assignments/:id ──────────────────────────────────────────────────
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const assignment = await Assignment.findById(req.params.id as string);
     if (!assignment) return res.status(404).json({ success: false, error: 'Not found' });
+    if (assignment.userId.toString() !== req.user!.id) {
+      return res.status(403).json({ success: false, error: 'Forbidden' });
+    }
     const paper = await QuestionPaper.findOne({ assignmentId: assignment._id });
     res.json({ success: true, assignment, paper });
   } catch (error) {

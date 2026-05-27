@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, RefreshCw, AlertCircle } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAssignmentStore } from '@/store/useAssignmentStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import PaperAnalytics from '@/components/PaperAnalytics';
 import DraggablePaper from '@/components/DraggablePaper';
 import PdfExport from '@/components/PdfExport';
@@ -47,12 +48,17 @@ export default function OutputPage() {
   const [assignment, setAssignment] = useState<AssignmentMeta | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuthStore();
 
   const fetchPaper = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/papers/${params.id}`);
+      const res = await fetch(`${API_URL}/api/papers/${params.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error || 'Failed to load paper');
       setPaper(data.paper);
@@ -65,9 +71,9 @@ export default function OutputPage() {
   };
 
   useEffect(() => {
-    if (params.id) fetchPaper();
+    if (params.id && token) fetchPaper();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.id]);
+  }, [params.id, token]);
 
   // ── Loading State ──────────────────────────────────────────────────────────
   if (loading) {
@@ -97,10 +103,10 @@ export default function OutputPage() {
               <RefreshCw size={15} /> Retry
             </button>
             <button
-              onClick={() => { reset(); router.push('/'); }}
+              onClick={() => { reset(); router.push('/dashboard'); }}
               className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors"
             >
-              Go Home
+              Go to Dashboard
             </button>
           </div>
         </div>
@@ -117,21 +123,21 @@ export default function OutputPage() {
       {/* ── Action Bar ── */}
       <div className="w-full max-w-3xl flex items-center justify-between py-4 px-2 mb-2">
         <button
-          onClick={() => { reset(); router.push('/'); }}
+          onClick={() => { reset(); router.push('/dashboard'); }}
           className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium transition-colors"
         >
           <ArrowLeft size={20} />
-          <span className="text-sm">Back to Creator</span>
+          <span className="text-sm">Back to Dashboard</span>
         </button>
 
         <div className="flex gap-2">
           <button
-            onClick={() => { reset(); router.push('/'); }}
-            title="Create New"
+            onClick={() => { reset(); router.push('/dashboard'); }}
+            title="Dashboard"
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
           >
             <RefreshCw size={15} />
-            New Assignment
+            Dashboard
           </button>
           
           <PdfExport paper={paper} assignment={assignment} />

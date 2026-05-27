@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IAssignment extends Document {
+  userId: mongoose.Types.ObjectId;
   dueDate: Date;
   questionTypes: string[];
   numberOfQuestions: number;
@@ -15,6 +16,7 @@ export interface IAssignment extends Document {
 }
 
 const AssignmentSchema: Schema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   dueDate: { type: Date, required: true },
   questionTypes: { type: [String], required: true },
   numberOfQuestions: { type: Number, required: true },

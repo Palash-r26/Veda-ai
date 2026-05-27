@@ -4,20 +4,9 @@ import React, { useState } from 'react';
 import { Document, Page, Text, View, StyleSheet, Font, pdf } from '@react-pdf/renderer';
 import { Download, Loader2 } from 'lucide-react';
 
-// ─── PDF Styles ───────────────────────────────────────────────────────────────
-
-Font.register({
-  family: 'Inter',
-  fonts: [
-    { src: 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff' }, // Regular
-    { src: 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuI6fAZ9hjp-Ek-_EeA.woff', fontWeight: 700 } // Bold
-  ]
-});
-
 const styles = StyleSheet.create({
   page: {
     padding: 40,
-    fontFamily: 'Inter',
     backgroundColor: '#ffffff',
   },
   header: {
@@ -87,8 +76,6 @@ const styles = StyleSheet.create({
   questionBlock: {
     flexDirection: 'row',
     marginBottom: 15,
-    // prevent page break inside a question
-    wrap: false,
   },
   qNum: {
     width: 25,
