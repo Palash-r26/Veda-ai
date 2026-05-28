@@ -286,7 +286,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="flex-1 flex flex-col min-w-0 h-full pb-20 md:pb-0 relative z-10 text-slate-800 dark:text-slate-200">
+    <main className="flex-1 flex flex-col min-w-0 h-full pb-20 md:pb-0 relative z-10 text-slate-800 dark:text-slate-200 px-2 sm:px-3 md:px-0">
           
           {/* Top Navbar */}
           <header className="bg-white dark:bg-[#131B2E] border border-slate-200/40 dark:border-slate-800/40 rounded-[24px] h-[72px] shadow-sm flex items-center justify-between px-4 md:px-6 mb-4 shrink-0 theme-transition">
@@ -398,7 +398,7 @@ export default function DashboardPage() {
                 <div className="flex-1 overflow-y-auto pb-32 no-scrollbar px-2 md:px-0">
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 content-start">
                     {assignments.map(assignment => (
-                      <div key={assignment._id} className="relative border border-gray-100 dark:border-slate-800/40 rounded-[28px] p-5 md:p-6 bg-white dark:bg-[#131B2E] flex flex-col group h-[140px] md:h-[210px] shadow-sm hover:shadow-md transition-shadow">
+                      <div key={assignment._id} className="relative border border-gray-100 dark:border-slate-800/40 rounded-[28px] p-5 md:p-6 bg-white dark:bg-[#131B2E] flex flex-col group h-auto md:h-[210px] shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex justify-between items-start mb-2 md:mb-4">
                           <h3 className="font-extrabold text-gray-900 dark:text-white text-[18px] md:text-[20px] tracking-tight truncate pr-8 mt-1">
                             {assignment.title || 'Quiz on Electricity'}

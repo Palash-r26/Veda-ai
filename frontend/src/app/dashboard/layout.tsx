@@ -137,7 +137,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <ProtectedRoute>
-      <div className="flex h-screen bg-[#EBECEF] dark:bg-[#0B0F19] p-2 md:p-4 gap-4 overflow-hidden font-sans relative theme-transition">
+      <div className="flex min-h-[100dvh] md:h-screen bg-[#EBECEF] dark:bg-[#0B0F19] p-2 md:p-4 gap-3 md:gap-4 overflow-hidden overflow-x-hidden font-sans relative theme-transition">
         
         {/* ─── LEFT SIDEBAR (Desktop Only) ────────────────────────────────────── */}
         <aside 

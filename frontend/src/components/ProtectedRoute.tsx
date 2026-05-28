@@ -24,7 +24,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   // Prevent hydration mismatch or flashing protected content
   if (!isMounted || !isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] px-4 overflow-x-hidden">
         <Loader2 className="animate-spin text-[#4BC36D]" size={40} />
       </div>
     );

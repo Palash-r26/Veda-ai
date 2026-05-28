@@ -40,8 +40,8 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+    <main className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4 sm:p-6 overflow-x-hidden">
+      <div className="w-full max-w-[420px] bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-gray-100">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Create an Account</h1>
         <p className="text-gray-500 mb-8 text-sm">Join VedaAI to generate intelligent assessments.</p>
         

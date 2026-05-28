@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={bricolage.className}>
+      <body className={`${bricolage.className} overflow-x-hidden`}>
         <Toaster
           position="top-center"
           toastOptions={{

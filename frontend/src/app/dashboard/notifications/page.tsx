@@ -256,11 +256,11 @@ useEffect(() => {
   };
 
   return (
-    <main className="flex-1 flex flex-col min-w-0 h-full pb-20 md:pb-0 relative z-10 text-slate-800 dark:text-slate-200">
+    <main className="flex-1 flex flex-col min-w-0 h-full pb-20 md:pb-0 relative z-10 text-slate-800 dark:text-slate-200 px-2 sm:px-3 md:px-0">
       
       {/* Header bar */}
-      <header className="bg-white dark:bg-[#131B2E] border border-slate-200/40 dark:border-slate-800/40 rounded-[24px] h-[72px] shadow-sm flex items-center justify-between px-4 md:px-6 mb-4 shrink-0 theme-transition">
-        <div className="flex items-center gap-4">
+      <header className="bg-white dark:bg-[#131B2E] border border-slate-200/40 dark:border-slate-800/40 rounded-[24px] min-h-[72px] h-auto py-3 md:py-0 shadow-sm flex items-center justify-between px-4 md:px-6 mb-4 shrink-0 theme-transition gap-3 flex-wrap">
+        <div className="flex items-center gap-3 md:gap-4 min-w-0">
           <button 
             onClick={() => router.push('/dashboard')}
             className="w-8 h-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-650 dark:text-slate-400 focus:outline-none"
@@ -273,7 +273,7 @@ useEffect(() => {
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           {activeTab === 'feed' && notifications.some(n => !readIds.includes(n._id)) && (
             <button
               onClick={markAllRead}

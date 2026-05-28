@@ -278,10 +278,10 @@ export default function InstitutionalLoginPage() {
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
-      <main id="home" className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] text-slate-800 dark:text-slate-200 flex flex-col font-sans theme-transition scroll-smooth">
+      <main id="home" className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B0F19] text-slate-800 dark:text-slate-200 flex flex-col font-sans theme-transition scroll-smooth overflow-x-hidden">
         
         {/* ─── HEADER NAVBAR ─── */}
-        <header className="w-full px-6 py-4 md:px-12 flex justify-between items-center bg-white/80 dark:bg-[#131B2E]/85 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60 z-40 sticky top-0 theme-transition">
+        <header className="w-full px-4 py-3 sm:px-6 md:px-12 flex justify-between items-center bg-white/80 dark:bg-[#131B2E]/85 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60 z-40 sticky top-0 theme-transition">
           <Link href="/" className="flex items-center gap-3 group cursor-pointer">
             {/* VedaAI Gradient Square Logo */}
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F57B36] via-[#D13636] to-[#3B0E0E] flex items-center justify-center shadow-lg shadow-red-500/20 shrink-0 transition-transform duration-200 group-hover:scale-105">
@@ -314,7 +314,7 @@ export default function InstitutionalLoginPage() {
         </header>
 
         {/* ─── SPLIT MAIN CONTENT ─── */}
-        <div className="max-w-7xl w-full mx-auto px-6 py-8 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-center relative z-10">
           
           {/* Left Side: VedaAI Identity & Feature Grid */}
           <div className="lg:col-span-7 space-y-8">
@@ -323,13 +323,13 @@ export default function InstitutionalLoginPage() {
                 <Sparkles size={14} className="text-[#F57B36] animate-spin" />
                 Advanced Assessment Engine
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-slate-900 dark:text-white">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] text-slate-900 dark:text-white">
                 VedaAI Assessment <br />
                 <span className="bg-gradient-to-r from-[#F57B36] to-[#E15A20] bg-clip-text text-transparent">
                   Platform
                 </span>
               </h1>
-              <p className="text-base md:text-lg text-slate-550 dark:text-slate-400 max-w-xl font-medium leading-relaxed">
+              <p className="text-sm sm:text-base md:text-lg text-slate-550 dark:text-slate-400 max-w-xl font-medium leading-relaxed">
                 Upload your textbooks, syllabus PDFs, or study sheets. Our RAG engine extracts academic contexts to formulate publication-ready question papers.
               </p>
             </div>
@@ -361,7 +361,7 @@ export default function InstitutionalLoginPage() {
 
           {/* Right Side: Traditional Login + Google Card */}
           <div className="lg:col-span-5 flex justify-center w-full">
-            <div className="w-full max-w-md bg-white dark:bg-[#131B2E] border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-8 shadow-xl theme-transition flex flex-col items-center">
+            <div className="w-full max-w-md bg-white dark:bg-[#131B2E] border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-xl theme-transition flex flex-col items-center">
               
               {/* VedaAI Logo Square */}
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#F57B36] via-[#D13636] to-[#3B0E0E] flex items-center justify-center shadow-lg shadow-red-500/20 mb-5 shrink-0">
@@ -555,7 +555,7 @@ export default function InstitutionalLoginPage() {
         </div>
 
         {/* ─── TEACHER WORKFLOW GUIDELINES ─── */}
-        <section id="guidelines" className="max-w-7xl w-full mx-auto px-6 py-16 border-t border-slate-200 dark:border-slate-900 mt-8 relative z-10 theme-transition">
+        <section id="guidelines" className="max-w-7xl w-full mx-auto px-4 sm:px-6 md:px-12 py-12 md:py-16 border-t border-slate-200 dark:border-slate-900 mt-8 relative z-10 theme-transition">
           
           <div className="text-center space-y-3 mb-12">
             <h2 className="text-2xl md:text-3xl font-black text-slate-950 dark:text-white tracking-tight flex items-center justify-center gap-2">
@@ -596,7 +596,7 @@ export default function InstitutionalLoginPage() {
         </section>
 
         {/* ─── FOOTER ─── */}
-        <footer id="developers" className="w-full bg-white dark:bg-[#131B2E] border-t border-slate-200 dark:border-slate-900 py-12 px-6 md:px-12 theme-transition relative z-10 mt-auto">
+        <footer id="developers" className="w-full bg-white dark:bg-[#131B2E] border-t border-slate-200 dark:border-slate-900 py-10 px-4 sm:px-6 md:px-12 theme-transition relative z-10 mt-auto">
           <div className="max-w-7xl w-full mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
             
             <div className="flex items-center gap-2.5">

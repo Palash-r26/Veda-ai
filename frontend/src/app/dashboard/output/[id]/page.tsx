@@ -100,7 +100,7 @@ export default function OutputPage() {
   // ── Loading State ──────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <main className="flex-1 flex flex-col min-w-0 h-full pb-20 md:pb-0 relative z-10 items-center justify-center">
+      <main className="flex-1 flex flex-col min-w-0 h-full pb-20 md:pb-0 relative z-10 items-center justify-center px-4 overflow-x-hidden">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
           <p className="text-gray-600 font-medium">Loading question paper…</p>
@@ -112,7 +112,7 @@ export default function OutputPage() {
   // ── Error State ────────────────────────────────────────────────────────────
   if (error || !paper) {
     return (
-      <main className="flex-1 flex flex-col min-w-0 h-full pb-20 md:pb-0 relative z-10 items-center justify-center">
+      <main className="flex-1 flex flex-col min-w-0 h-full pb-20 md:pb-0 relative z-10 items-center justify-center px-4 overflow-x-hidden">
         <div className="flex flex-col items-center gap-4 text-center max-w-sm">
           <AlertCircle className="text-red-500" size={40} />
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Could not load paper</h2>
@@ -138,12 +138,12 @@ export default function OutputPage() {
 
   // ── Rendered Paper ─────────────────────────────────────────────────────────
   return (
-    <main className="flex-1 flex flex-col min-w-0 h-full pb-20 md:pb-0 relative z-10">
+    <main className="flex-1 flex flex-col min-w-0 h-full pb-20 md:pb-0 relative z-10 px-2 sm:px-3 md:px-0 overflow-x-hidden">
       
       {/* ── Top Navbar ── */}
-      <header className="bg-white dark:bg-[#131B2E] border border-slate-200/40 dark:border-slate-800/40 rounded-[24px] h-[72px] shadow-sm flex items-center justify-between px-4 md:px-6 mb-4 shrink-0 theme-transition">
+      <header className="bg-white dark:bg-[#131B2E] border border-slate-200/40 dark:border-slate-800/40 rounded-[24px] min-h-[72px] h-auto py-3 md:py-0 shadow-sm flex items-center justify-between px-4 md:px-6 mb-4 shrink-0 theme-transition gap-3 flex-wrap">
         {/* Left side */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <button 
             onClick={handleBack}
             className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors text-gray-600 dark:text-slate-400"
@@ -171,7 +171,7 @@ export default function OutputPage() {
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-2 md:gap-3 flex-wrap justify-end">
           <button
             onClick={() => router.push('/dashboard/notifications')}
             className="relative w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400"
@@ -187,7 +187,7 @@ export default function OutputPage() {
       <div className="flex-1 overflow-y-auto no-scrollbar pb-10">
         
         {/* Container */}
-        <div className="w-full max-w-5xl mx-auto flex flex-col gap-5 md:gap-6 min-h-full px-2 md:px-0">
+        <div className="w-full max-w-5xl mx-auto flex flex-col gap-5 md:gap-6 min-h-full px-2 sm:px-4 md:px-0">
           
           {/* Header Text & Download Button */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-2">
