@@ -5,6 +5,7 @@ import { io, Socket } from 'socket.io-client';
 import { useAssignmentStore } from '../store/useAssignmentStore';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { API_URL } from '@/lib/api';
 
 /**
  * SocketProvider — establishes ONE socket connection for the app lifetime.
@@ -22,7 +23,7 @@ export default function SocketProvider({ children }: { children: React.ReactNode
 
   // ── Create socket once on mount ──────────────────────────────────────────
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000', {
+    const socket = io(API_URL, {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
     });

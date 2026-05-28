@@ -5,9 +5,9 @@ import { useAssignmentStore } from '../store/useAssignmentStore';
 import { ArrowLeft, Loader2, Paperclip, X, UploadCloud, Plus, Minus, Calendar, Mic, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/useAuthStore';
+import { API_URL } from '@/lib/api';
 
 const QUESTION_TYPE_OPTIONS = ['Multiple Choice Questions', 'Short Questions', 'Long Questions', 'Diagram/Graph-Based Questions', 'Numerical Problems', 'True/False'];
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 interface QuestionConfig {
   id: string;
@@ -16,7 +16,7 @@ interface QuestionConfig {
   marks: number;
 }
 
-export default function AssignmentForm({ onCancel }: { onCancel: () => void }) {
+export default function AssignmentForm({ onCancel, onSuccess }: { onCancel: () => void; onSuccess?: () => void }) {
   const { status, setJobStatus, progressMessage, progressStep, errorMessage } = useAssignmentStore();
   const { token } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -139,7 +139,7 @@ export default function AssignmentForm({ onCancel }: { onCancel: () => void }) {
     } catch (err) {
       console.error(err);
       setJobStatus('failed', '', '');
-      toast.error('Network error — is the backend running?');
+      toast.error('Network error - is the backend running?');
     }
   };
 
@@ -208,7 +208,7 @@ export default function AssignmentForm({ onCancel }: { onCancel: () => void }) {
                 <div className="w-3 h-3 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
                 <h2 className="text-[24px] font-extrabold text-gray-900 tracking-tight">Create Assignment</h2>
               </div>
-              <p className="text-[13px] text-gray-500 font-medium ml-6">Set up a new assignment for your students</p>
+              <p className="text-[13px] text-gray-500 font-medium ml-6">Set up a new assignment for your class</p>
             </div>
             
             {/* Mobile Header */}

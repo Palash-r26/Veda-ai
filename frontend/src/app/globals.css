@@ -1,26 +1,122 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+  --card-bg: #FFFFFF;
+  --card-border: #E2E8F0;
+  --sidebar-bg: #FFFFFF;
+  --sidebar-hover: #F1F5F9;
+  --header-bg: #FFFFFF;
+  --input-bg: #FFFFFF;
+  --badge-bg: #F1F5F9;
+}
+
+.dark {
+  --background: #0B0F19;
+  --foreground: #F8FAFC;
+  --card-bg: #131B2E;
+  --card-border: #1E293B;
+  --sidebar-bg: #131B2E;
+  --sidebar-hover: #1E293B;
+  --header-bg: #131B2E;
+  --input-bg: #1E293B;
+  --badge-bg: #1E293B;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  
+  /* Remap Emerald palette to VedaAI brand Orange-Red globally */
+  --color-emerald-50: #FFF7ED;
+  --color-emerald-100: #FFEDD5;
+  --color-emerald-25: rgba(245, 123, 54, 0.05);
+  --color-emerald-50/10: rgba(245, 123, 54, 0.1);
+  --color-emerald-500/10: rgba(245, 123, 54, 0.1);
+  --color-emerald-200: #FED7AA;
+  --color-emerald-300: #FDBA74;
+  --color-emerald-400: #FB923C;
+  --color-emerald-500: #F57B36; /* Brand Primary Orange */
+  --color-emerald-600: #E15A20; /* Deep Accent Orange-Red */
+  --color-emerald-700: #C2410C;
+  --color-emerald-850: #431407;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Custom design system utilities */
+.theme-transition {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, shadow 0.3s ease;
+}
+
+@keyframes toast-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.94);
+    filter: blur(6px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(2px) scale(1.01);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes modal-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.veda-toast {
+  animation: toast-enter 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.veda-modal-overlay {
+  animation: fade-in 180ms ease-out both;
+}
+
+.veda-modal-panel {
+  animation: modal-enter 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Custom Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* 3D tilt hover cards effect */
+.tilt-card {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease, box-shadow 0.4s ease;
+}
+.tilt-card:hover {
+  transform: translateY(-8px) rotateX(2deg) rotateY(2deg);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(245, 123, 54, 0.1);
+  border-color: rgba(245, 123, 54, 0.4) !important;
 }

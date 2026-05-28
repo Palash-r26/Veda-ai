@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
+import { API_URL } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 interface RegenerateButtonProps {
@@ -20,7 +21,6 @@ export default function RegenerateButton({ paperId, sectionIndex, questionIndex,
   const handleRegenerate = async () => {
     setIsRegenerating(true);
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const res = await fetch(`${API_URL}/api/papers/${paperId}/regenerate-question`, {
         method: 'POST',
         headers: { 

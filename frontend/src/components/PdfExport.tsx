@@ -10,45 +10,79 @@ const styles = StyleSheet.create({
     padding: 40,
     backgroundColor: '#ffffff',
   },
-  header: {
-    marginBottom: 20,
-    borderBottom: '1pt solid #e5e7eb',
+  headerBox: {
+    marginBottom: 15,
+    borderBottom: '2pt solid #111827',
     paddingBottom: 15,
   },
-  title: {
-    fontSize: 24,
+  headerTop: {
+    marginBottom: 15,
+    alignItems: 'center',
+  },
+  schoolName: {
+    fontSize: 22,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  metaText: {
-    fontSize: 10,
-    color: '#6b7280',
-    textAlign: 'center',
+    textTransform: 'uppercase',
     marginBottom: 4,
+    color: '#111827',
   },
-  studentInfo: {
+  examType: {
+    fontSize: 9,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    color: '#6b7280',
+  },
+  infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 30,
-    borderBottom: '1pt solid #e5e7eb',
-    paddingBottom: 15,
+    marginBottom: 6,
+    paddingHorizontal: 5,
   },
-  infoField: {
+  infoText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#374151',
+  },
+  studentInfoRow: {
+    flexDirection: 'row',
+    marginTop: 10,
+    justifyContent: 'space-between',
+    paddingHorizontal: 5,
+  },
+  studentFieldWrap: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     flex: 1,
-    marginRight: 15,
   },
-  infoLabel: {
+  studentLabel: {
     fontSize: 10,
     fontWeight: 'bold',
-    marginRight: 5,
+    marginRight: 4,
+    color: '#4b5563',
   },
-  infoLine: {
+  studentLine: {
     flex: 1,
-    borderBottom: '1pt dotted #9ca3af',
-    height: 12,
+    borderBottom: '1pt dashed #9ca3af',
+    marginRight: 15,
+  },
+  instructionsBox: {
+    marginBottom: 25,
+    padding: 12,
+    border: '1pt solid #e5e7eb',
+    backgroundColor: '#f9fafb',
+    borderRadius: 8,
+  },
+  instructionsTitle: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    marginBottom: 6,
+    textTransform: 'uppercase',
+  },
+  instructionItem: {
+    fontSize: 9,
+    color: '#4b5563',
+    marginBottom: 3,
   },
   section: {
     marginBottom: 25,
@@ -140,29 +174,48 @@ const PaperDocument = ({ paper, assignment }: { paper: any, assignment: any }) =
     <Document>
       <Page size="A4" style={styles.page}>
         
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{assignment?.schoolName || 'Delhi Public School'}</Text>
-          <Text style={styles.metaText}>Subject: {assignment?.subject || 'English'}  •  Class: {assignment?.grade || 'Class 10'}  •  Time Allowed: {assignment?.timeAllowed || '3 Hours'}</Text>
-          <Text style={styles.metaText}>
-            Types: {assignment?.questionTypes?.join(', ')} • Total Marks: {totalMarks} • Total Questions: {totalQuestions}
-          </Text>
+        {/* ── Standard Paper Header ── */}
+        <View style={styles.headerBox}>
+          {/* Top part: School Name */}
+          <View style={styles.headerTop}>
+            <Text style={styles.schoolName}>{assignment?.schoolName || 'Delhi Public School'}</Text>
+            <Text style={styles.examType}>Terminal Examination</Text>
+          </View>
+
+          {/* Info Rows */}
+          <View style={styles.infoRow}>
+            <Text style={styles.infoText}>Subject: {assignment?.subject || 'English'}</Text>
+            <Text style={styles.infoText}>Time Allowed: {assignment?.timeAllowed || '3 Hours'}</Text>
+          </View>
+          <View style={{ ...styles.infoRow, marginBottom: 15 }}>
+            <Text style={styles.infoText}>Class: {assignment?.grade || 'Class 10'}</Text>
+            <Text style={styles.infoText}>Maximum Marks: {totalMarks}</Text>
+          </View>
+
+          {/* Student Info Row */}
+          <View style={styles.studentInfoRow}>
+            <View style={styles.studentFieldWrap}>
+              <Text style={styles.studentLabel}>Name:</Text>
+              <View style={styles.studentLine} />
+            </View>
+            <View style={{ ...styles.studentFieldWrap, flex: 0.6 }}>
+              <Text style={styles.studentLabel}>Roll No:</Text>
+              <View style={styles.studentLine} />
+            </View>
+            <View style={{ ...styles.studentFieldWrap, flex: 0.4 }}>
+              <Text style={styles.studentLabel}>Section:</Text>
+              <View style={{ ...styles.studentLine, marginRight: 0 }} />
+            </View>
+          </View>
         </View>
 
-        {/* Student Info */}
-        <View style={styles.studentInfo}>
-          <View style={styles.infoField}>
-            <Text style={styles.infoLabel}>Name:</Text>
-            <View style={styles.infoLine} />
-          </View>
-          <View style={styles.infoField}>
-            <Text style={styles.infoLabel}>Roll No:</Text>
-            <View style={styles.infoLine} />
-          </View>
-          <View style={{ ...styles.infoField, marginRight: 0 }}>
-            <Text style={styles.infoLabel}>Section:</Text>
-            <View style={styles.infoLine} />
-          </View>
+        {/* Guidelines */}
+        <View style={styles.instructionsBox}>
+          <Text style={styles.instructionsTitle}>General Instructions:</Text>
+          <Text style={styles.instructionItem}>1. Read all questions carefully before answering.</Text>
+          <Text style={styles.instructionItem}>2. All questions are compulsory unless stated otherwise in a specific section.</Text>
+          <Text style={styles.instructionItem}>3. Write your answers neatly and legibly.</Text>
+          <Text style={styles.instructionItem}>4. The question paper consists of various sections, each with its own specific instructions.</Text>
         </View>
 
         {/* Sections */}

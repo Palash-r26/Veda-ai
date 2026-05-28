@@ -7,6 +7,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
 import RegenerateButton from './RegenerateButton';
 import { useAuthStore } from '@/store/useAuthStore';
+import { API_URL } from '@/lib/api';
 
 // ─── Sortable Question Component ──────────────────────────────────────────────
 function SortableQuestion({ 
@@ -196,7 +197,6 @@ export default function DraggablePaper({ paper, setPaper, assignment, onError }:
         }))
       };
 
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const res = await fetch(`${API_URL}/api/papers/${paper._id}/reorder`, {
         method: 'PATCH',
         headers: { 
@@ -243,39 +243,55 @@ export default function DraggablePaper({ paper, setPaper, assignment, onError }:
         onDragEnd={handleDragEnd}
       >
         {/* ── Standard Paper Header ── */}
-        <div className="mb-10 text-center border-b-2 border-gray-900 pb-8 pt-4">
-          <h1 className="text-2xl font-extrabold text-gray-900 mb-6 tracking-tight">
-            {assignment?.schoolName || 'Delhi Public School'}
-          </h1>
-          
-          <div className="text-[15px] font-bold text-gray-800 space-y-1">
-            <p>Subject: {assignment?.subject || 'English'}</p>
-            <p>Class: {assignment?.grade || 'Class 10'}</p>
+        <div className="mb-8 text-gray-900 border-b-2 border-gray-900 pb-8 pt-4">
+          {/* Top part: School Name */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl md:text-[28px] font-black uppercase tracking-tight text-gray-900 mb-2">
+              {assignment?.schoolName || 'Delhi Public School'}
+            </h1>
+            <p className="text-[12px] font-bold uppercase tracking-[0.15em] text-gray-500">
+              Terminal Examination
+            </p>
           </div>
           
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mt-8 text-[14px] font-bold text-gray-800 gap-2">
-            <p>Time Allowed: {assignment?.timeAllowed || '3 Hours'}</p>
-            <p>Maximum Marks: {assignment?.totalMarks || 100}</p>
-          </div>
-          
-          <p className="text-left mt-8 text-[14px] font-bold text-gray-800">
-            All questions are compulsory unless stated otherwise.
-          </p>
-          
-          <div className="text-left mt-8 space-y-4 text-[14px] font-bold text-gray-800 flex flex-col items-start w-full max-w-sm">
-            <div className="flex items-end w-full">
-              <span className="w-20 shrink-0">Name:</span> 
-              <div className="border-b-2 border-gray-900 flex-1 ml-2 h-4"></div>
+          {/* Info Rows */}
+          <div className="space-y-4 px-2">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center text-[14px] md:text-[15px] font-bold text-gray-800">
+              <p>Subject: {assignment?.subject || 'English'}</p>
+              <p>Time Allowed: {assignment?.timeAllowed || '3 Hours'}</p>
             </div>
-            <div className="flex items-end w-full">
-              <span className="w-28 shrink-0">Roll Number:</span> 
-              <div className="border-b-2 border-gray-900 flex-1 ml-2 h-4"></div>
-            </div>
-            <div className="flex items-end w-full">
-              <span className="shrink-0">Class: {assignment?.grade || 'Class 10'} Section:</span> 
-              <div className="border-b-2 border-gray-900 flex-1 ml-2 h-4"></div>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center text-[14px] md:text-[15px] font-bold text-gray-800">
+              <p>Class: {assignment?.grade || 'Class 10'}</p>
+              <p>Maximum Marks: {assignment?.totalMarks || 100}</p>
             </div>
           </div>
+          
+          {/* Student Info Row */}
+          <div className="mt-8 px-2 flex flex-col md:flex-row gap-4 md:gap-8 justify-between items-end font-bold text-[14px] text-gray-800">
+            <div className="flex items-end flex-1 w-full">
+              <span className="shrink-0 mr-2">Name:</span> 
+              <div className="border-b border-gray-400 border-dashed flex-1 h-4"></div>
+            </div>
+            <div className="flex items-end w-full md:w-64">
+              <span className="shrink-0 mr-2">Roll No:</span> 
+              <div className="border-b border-gray-400 border-dashed flex-1 h-4"></div>
+            </div>
+            <div className="flex items-end w-full md:w-48">
+              <span className="shrink-0 mr-2">Section:</span> 
+              <div className="border-b border-gray-400 border-dashed flex-1 h-4"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Guidelines */}
+        <div className="mb-10 border border-gray-200 bg-gray-50/50 p-5 rounded-xl">
+          <h3 className="font-extrabold text-gray-900 mb-3 text-[14px] uppercase tracking-wide">General Instructions:</h3>
+          <ol className="list-decimal pl-5 space-y-1.5 text-[13px] font-semibold text-gray-600">
+            <li>Read all questions carefully before answering.</li>
+            <li>All questions are compulsory unless stated otherwise in a specific section.</li>
+            <li>Write your answers neatly and legibly.</li>
+            <li>The question paper consists of various sections, each with its own specific instructions.</li>
+          </ol>
         </div>
 
         <div className="space-y-10">
@@ -284,7 +300,7 @@ export default function DraggablePaper({ paper, setPaper, assignment, onError }:
             return (
               <div key={section.id} id={section.id} className="space-y-5">
                 {/* Section Header */}
-                <div className="flex items-start justify-between gap-4 pb-2 border-b-2 border-gray-900">
+                <div className="flex items-start justify-between gap-4 pb-3 border-b border-slate-200">
                   <div>
                     <h2 className="text-lg font-bold text-gray-900">{section.title}</h2>
                     <p className="text-sm text-gray-500 italic mt-0.5">{section.instructions}</p>
@@ -323,7 +339,7 @@ export default function DraggablePaper({ paper, setPaper, assignment, onError }:
         </div>
 
         {/* ── End of Paper ── */}
-        <div className="mt-12 text-[14px] font-bold text-gray-900 border-t-2 border-gray-900 pt-8 text-center">
+        <div className="mt-12 text-[14px] font-bold text-slate-400 border-t border-slate-200 pt-8 text-center uppercase tracking-wider">
           <p>End of Question Paper</p>
         </div>
 

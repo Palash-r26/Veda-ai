@@ -20,7 +20,35 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={bricolage.className}>
-        <Toaster position="top-center" />
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 3800,
+            className: 'veda-toast',
+            style: {
+              borderRadius: '18px',
+              border: '1px solid var(--card-border)',
+              background: 'color-mix(in srgb, var(--card-bg) 90%, transparent)',
+              color: 'var(--foreground)',
+              boxShadow: '0 20px 50px rgba(15, 23, 42, 0.18)',
+              backdropFilter: 'blur(16px)',
+              padding: '14px 16px',
+              fontWeight: 700,
+            },
+            success: {
+              iconTheme: {
+                primary: '#22C55E',
+                secondary: '#ECFDF5',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: '#EF4444',
+                secondary: '#FEF2F2',
+              },
+            },
+          }}
+        />
         <SocketProvider>
           {children}
         </SocketProvider>

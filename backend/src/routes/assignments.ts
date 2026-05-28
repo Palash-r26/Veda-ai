@@ -5,6 +5,7 @@ import fs from 'fs';
 // pdf-parse needs require() — its CJS export doesn't have a default property
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pdfParse = require('pdf-parse') as (buffer: Buffer) => Promise<{ text: string; numpages: number }>;
+import { User } from '../models/User';
 import { Assignment } from '../models/Assignment';
 import { QuestionPaper } from '../models/QuestionPaper';
 import { generationQueue } from '../queue/queue';
@@ -177,7 +178,10 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const assignment = await Assignment.findById(req.params.id as string);
     if (!assignment) return res.status(404).json({ success: false, error: 'Not found' });
-    if (assignment.userId.toString() !== req.user!.id) {
+    
+    // Allow admins to delete any assignment
+    const userRecord = await User.findById(req.user!.id);
+    if (assignment.userId.toString() !== req.user!.id && userRecord?.role !== 'admin') {
       return res.status(403).json({ success: false, error: 'Forbidden' });
     }
     

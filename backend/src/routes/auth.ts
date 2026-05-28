@@ -18,10 +18,10 @@ function getJwtSecret() {
 // ─── POST /api/auth/register ────────────────────────────────────────────────
 router.post('/register', async (req: Request, res: Response) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
     
     if (!name || !email || !password) {
-      return res.status(400).json({ success: false, error: 'All fields are required' });
+      return res.status(400).json({ success: false, error: 'Name, email, and password are required' });
     }
 
     const existing = await User.findOne({ email });
@@ -32,19 +32,37 @@ router.post('/register', async (req: Request, res: Response) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    const user = new User({ name, email, passwordHash });
+    // Validate role, default to teacher
+    const validRoles = ['teacher', 'admin'];
+    const assignedRole = validRoles.includes(role) ? role : 'teacher';
+
+    const user = new User({ name, email, passwordHash, role: assignedRole });
     await user.save();
 
-    const token = jwt.sign({ id: user.id, email: user.email }, getJwtSecret(), { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, getJwtSecret(), { expiresIn: '7d' });
 
     res.status(201).json({
       success: true,
       token,
-      user: { id: user.id, name: user.name, email: user.email }
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
     });
   } catch (error) {
     console.error('Register error:', error);
     res.status(500).json({ success: false, error: 'Registration failed' });
+  }
+});
+
+// ─── POST /api/auth/check-email (for Google Auth) ───────────────────────────
+router.post('/check-email', async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, error: 'Email is required' });
+
+    const user = await User.findOne({ email });
+    res.json({ success: true, exists: !!user });
+  } catch (error) {
+    console.error('Check email error:', error);
+    res.status(500).json({ success: false, error: 'Failed to check email' });
   }
 });
 
@@ -67,12 +85,12 @@ router.post('/login', async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email }, getJwtSecret(), { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, getJwtSecret(), { expiresIn: '7d' });
 
     res.json({
       success: true,
       token,
-      user: { id: user.id, name: user.name, email: user.email }
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -87,6 +105,36 @@ router.get('/me', requireAuth, async (req: AuthRequest, res: Response) => {
     res.json({ success: true, user });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to fetch profile' });
+  }
+});
+
+// ─── POST /api/auth/change-password ──────────────────────────────────────────
+router.post('/change-password', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, error: 'Current password and new password are required' });
+    }
+
+    const user = await User.findById(req.user!.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, error: 'Current password is incorrect' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.json({ success: true, message: 'Password updated successfully!' });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ success: false, error: 'Failed to change password' });
   }
 });
 
