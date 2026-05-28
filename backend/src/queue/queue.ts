@@ -13,6 +13,7 @@ export const connection = {
   password: url.password || undefined,
   tls: redisUrl.startsWith('rediss://') ? {} : undefined,
   maxRetriesPerRequest: null as null,
+  family: 4, // Force IPv4, often required for Upstash locally to prevent ENOTFOUND
 };
 
 /** Main generation queue — processes AI question paper creation */

@@ -2,8 +2,14 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IAssignment extends Document {
   userId: mongoose.Types.ObjectId;
+  title: string;
   dueDate: Date;
+  schoolName?: string;
+  subject?: string;
+  grade?: string;
+  timeAllowed?: string;
   questionTypes: string[];
+  questionsConfig?: { type: string; count: number; marks: number }[];
   numberOfQuestions: number;
   totalMarks: number;
   instructions: string;
@@ -17,8 +23,18 @@ export interface IAssignment extends Document {
 
 const AssignmentSchema: Schema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  title: { type: String, default: 'Untitled Assignment' },
   dueDate: { type: Date, required: true },
+  schoolName: { type: String, default: 'Delhi Public School' },
+  subject: { type: String, default: 'English' },
+  grade: { type: String, default: 'Class 10' },
+  timeAllowed: { type: String, default: '3 Hours' },
   questionTypes: { type: [String], required: true },
+  questionsConfig: [{
+    type: { type: String, required: true },
+    count: { type: Number, required: true },
+    marks: { type: Number, required: true }
+  }],
   numberOfQuestions: { type: Number, required: true },
   totalMarks: { type: Number, required: true },
   instructions: { type: String, default: '' },

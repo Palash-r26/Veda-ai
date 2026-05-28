@@ -5,7 +5,15 @@ import { User } from '../models/User';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-do-not-use-in-prod';
+
+function getJwtSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET is not configured');
+  }
+
+  return secret;
+}
 
 // ─── POST /api/auth/register ────────────────────────────────────────────────
 router.post('/register', async (req: Request, res: Response) => {
@@ -27,7 +35,7 @@ router.post('/register', async (req: Request, res: Response) => {
     const user = new User({ name, email, passwordHash });
     await user.save();
 
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, email: user.email }, getJwtSecret(), { expiresIn: '7d' });
 
     res.status(201).json({
       success: true,
@@ -59,7 +67,7 @@ router.post('/login', async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, email: user.email }, getJwtSecret(), { expiresIn: '7d' });
 
     res.json({
       success: true,

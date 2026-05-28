@@ -6,6 +6,7 @@ export interface IQuestion {
   text: string;
   difficulty: 'Easy' | 'Moderate' | 'Hard';
   marks: number;
+  answer?: string;
 }
 
 export interface ISection {
@@ -32,6 +33,7 @@ const QuestionSchema: Schema = new Schema(
     text: { type: String, required: true },
     difficulty: { type: String, enum: ['Easy', 'Moderate', 'Hard'], required: true },
     marks: { type: Number, required: true },
+    answer: { type: String, default: '' },
   },
   { _id: false } // Questions don't need individual _ids for now
 );

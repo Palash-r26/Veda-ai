@@ -6,6 +6,7 @@ export const QuestionSchema = z.object({
   text: z.string().min(5, 'Question text must be at least 5 characters'),
   difficulty: z.enum(['Easy', 'Moderate', 'Hard']),
   marks: z.number().int().positive('Marks must be a positive integer'),
+  answer: z.string().optional().default(''),
 });
 
 export const SectionSchema = z.object({
@@ -30,6 +31,7 @@ export const SingleQuestionSchema = z.object({
   text: z.string().min(5),
   difficulty: z.enum(['Easy', 'Moderate', 'Hard']),
   marks: z.number().int().positive(),
+  answer: z.string().optional().default(''),
 });
 
 /**
@@ -46,6 +48,7 @@ export const ReorderPayloadSchema = z.object({
           text: z.string(),
           difficulty: z.enum(['Easy', 'Moderate', 'Hard']),
           marks: z.number().int().positive(),
+          answer: z.string().optional().default(''),
         })
       ),
     })

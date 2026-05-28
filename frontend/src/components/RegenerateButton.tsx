@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
+import toast from 'react-hot-toast';
 
 interface RegenerateButtonProps {
   paperId: string;
@@ -35,8 +36,10 @@ export default function RegenerateButton({ paperId, sectionIndex, questionIndex,
       }
 
       onSuccess(sectionIndex, questionIndex, data.question);
+      toast.success('Question regenerated');
     } catch (err: any) {
       console.error('Regenerate error:', err);
+      toast.error(err.message || 'Failed to regenerate question');
       onError(err.message || 'Network error');
     } finally {
       setIsRegenerating(false);

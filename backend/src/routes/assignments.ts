@@ -64,23 +64,32 @@ async function extractTextFromFile(filePath: string, originalName: string): Prom
 // ─── POST /api/assignments ─────────────────────────────────────────────────────
 router.post('/', requireAuth, upload.single('file'), async (req: AuthRequest, res: Response) => {
   try {
-    const { dueDate, questionTypes, numberOfQuestions, totalMarks, instructions } = req.body;
+    const { title, dueDate, instructions, questionsConfig, schoolName, subject, grade, timeAllowed } = req.body;
 
-    // Parse questionTypes from FormData (comes as a JSON string)
-    let parsedTypes: string[] = [];
+    let parsedConfig: { type: string; count: number; marks: number }[] = [];
     try {
-      parsedTypes = typeof questionTypes === 'string'
-        ? JSON.parse(questionTypes)
-        : questionTypes;
+      parsedConfig = typeof questionsConfig === 'string'
+        ? JSON.parse(questionsConfig)
+        : questionsConfig;
     } catch {
-      parsedTypes = Array.isArray(questionTypes) ? questionTypes : [questionTypes];
+      parsedConfig = [];
     }
 
-    // Validate numeric inputs
-    const numQ = Number(numberOfQuestions);
-    const numM = Number(totalMarks);
+    if (!parsedConfig || !parsedConfig.length) {
+      return res.status(400).json({ success: false, error: 'At least one question type is required' });
+    }
+
+    let numQ = 0;
+    let numM = 0;
+    const parsedTypes: string[] = [];
+
+    parsedConfig.forEach(q => {
+      numQ += Number(q.count);
+      numM += (Number(q.count) * Number(q.marks));
+      if (!parsedTypes.includes(q.type)) parsedTypes.push(q.type);
+    });
+
     if (!dueDate) return res.status(400).json({ success: false, error: 'dueDate is required' });
-    if (!parsedTypes.length) return res.status(400).json({ success: false, error: 'At least one question type is required' });
     if (numQ < 1) return res.status(400).json({ success: false, error: 'numberOfQuestions must be >= 1' });
     if (numM < 1) return res.status(400).json({ success: false, error: 'totalMarks must be >= 1' });
 
@@ -102,7 +111,13 @@ router.post('/', requireAuth, upload.single('file'), async (req: AuthRequest, re
 
     const assignment = new Assignment({
       userId: req.user!.id,
+      title: title || 'Untitled Assignment',
       dueDate,
+      schoolName: schoolName || 'Delhi Public School',
+      subject: subject || 'English',
+      grade: grade || 'Class 10',
+      timeAllowed: timeAllowed || '3 Hours',
+      questionsConfig: parsedConfig,
       questionTypes: parsedTypes,
       numberOfQuestions: numQ,
       totalMarks: numM,
@@ -154,6 +169,25 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res: Response) => {
     res.json({ success: true, assignment, paper });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to fetch assignment' });
+  }
+});
+
+// ─── DELETE /api/assignments/:id ──────────────────────────────────────────────
+router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const assignment = await Assignment.findById(req.params.id as string);
+    if (!assignment) return res.status(404).json({ success: false, error: 'Not found' });
+    if (assignment.userId.toString() !== req.user!.id) {
+      return res.status(403).json({ success: false, error: 'Forbidden' });
+    }
+    
+    // Delete the assignment and any associated generated paper
+    await Assignment.findByIdAndDelete(assignment._id);
+    await QuestionPaper.deleteMany({ assignmentId: assignment._id });
+    
+    res.json({ success: true, message: 'Assignment deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to delete assignment' });
   }
 });
 

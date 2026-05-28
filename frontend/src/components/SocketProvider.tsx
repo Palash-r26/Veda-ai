@@ -60,7 +60,7 @@ export default function SocketProvider({ children }: { children: React.ReactNode
       if (data.jobId === currentJobId) {
         setCompleted(data.paperId);
         toast.success('Paper generated successfully!');
-        router.push(`/output/${data.paperId}`);
+        router.push(`/dashboard/output/${data.paperId}`);
       }
     };
 

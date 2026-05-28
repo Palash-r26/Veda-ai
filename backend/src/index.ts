@@ -19,7 +19,7 @@ const EnvSchema = z.object({
   MONGODB_URI: z.string().url("MONGODB_URI must be a valid URL").optional(),
   REDIS_URL: z.string().url("REDIS_URL must be a valid URL").optional(),
   PORT: z.string().optional(),
-  JWT_SECRET: z.string().optional(),
+  JWT_SECRET: z.string().min(1, "JWT_SECRET is missing"),
 });
 
 try {

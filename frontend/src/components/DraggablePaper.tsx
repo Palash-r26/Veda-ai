@@ -72,10 +72,11 @@ function SortableQuestion({
 interface DraggablePaperProps {
   paper: any;
   setPaper: (paper: any) => void;
+  assignment?: any;
   onError: (msg: string) => void;
 }
 
-export default function DraggablePaper({ paper, setPaper, onError }: DraggablePaperProps) {
+export default function DraggablePaper({ paper, setPaper, assignment, onError }: DraggablePaperProps) {
   // We need stable IDs for dnd-kit. We'll generate a unique ID for each question on mount
   // and maintain a flattened state for easy DnD across sections.
   
@@ -241,6 +242,42 @@ export default function DraggablePaper({ paper, setPaper, onError }: DraggablePa
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
+        {/* ── Standard Paper Header ── */}
+        <div className="mb-10 text-center border-b-2 border-gray-900 pb-8 pt-4">
+          <h1 className="text-2xl font-extrabold text-gray-900 mb-6 tracking-tight">
+            {assignment?.schoolName || 'Delhi Public School'}
+          </h1>
+          
+          <div className="text-[15px] font-bold text-gray-800 space-y-1">
+            <p>Subject: {assignment?.subject || 'English'}</p>
+            <p>Class: {assignment?.grade || 'Class 10'}</p>
+          </div>
+          
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mt-8 text-[14px] font-bold text-gray-800 gap-2">
+            <p>Time Allowed: {assignment?.timeAllowed || '3 Hours'}</p>
+            <p>Maximum Marks: {assignment?.totalMarks || 100}</p>
+          </div>
+          
+          <p className="text-left mt-8 text-[14px] font-bold text-gray-800">
+            All questions are compulsory unless stated otherwise.
+          </p>
+          
+          <div className="text-left mt-8 space-y-4 text-[14px] font-bold text-gray-800 flex flex-col items-start w-full max-w-sm">
+            <div className="flex items-end w-full">
+              <span className="w-20 shrink-0">Name:</span> 
+              <div className="border-b-2 border-gray-900 flex-1 ml-2 h-4"></div>
+            </div>
+            <div className="flex items-end w-full">
+              <span className="w-28 shrink-0">Roll Number:</span> 
+              <div className="border-b-2 border-gray-900 flex-1 ml-2 h-4"></div>
+            </div>
+            <div className="flex items-end w-full">
+              <span className="shrink-0">Class: {assignment?.grade || 'Class 10'} Section:</span> 
+              <div className="border-b-2 border-gray-900 flex-1 ml-2 h-4"></div>
+            </div>
+          </div>
+        </div>
+
         <div className="space-y-10">
           {items.map((section, sIdx) => {
             const sectionMarks = section.questions.reduce((s: number, q: any) => s + q.marks, 0);
@@ -283,6 +320,11 @@ export default function DraggablePaper({ paper, setPaper, onError }: DraggablePa
               </div>
             );
           })}
+        </div>
+
+        {/* ── End of Paper ── */}
+        <div className="mt-12 text-[14px] font-bold text-gray-900 border-t-2 border-gray-900 pt-8 text-center">
+          <p>End of Question Paper</p>
         </div>
 
         <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.4' } } }) }}>
