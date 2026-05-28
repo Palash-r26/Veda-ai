@@ -121,6 +121,10 @@ export default function DashboardPage() {
     }
   };
 
+  const handleOpenAssignment = (assignmentId: string) => {
+    router.push(`/dashboard/output/${assignmentId}`);
+  };
+
   // If role is admin, render a premium administration panel
   if (user?.role === 'admin') {
     return (
@@ -398,7 +402,19 @@ export default function DashboardPage() {
                 <div className="flex-1 overflow-y-auto pb-32 no-scrollbar px-2 md:px-0">
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 content-start">
                     {assignments.map(assignment => (
-                      <div key={assignment._id} className="relative border border-gray-100 dark:border-slate-800/40 rounded-[28px] p-5 md:p-6 bg-white dark:bg-[#131B2E] flex flex-col group h-auto md:h-[210px] shadow-sm hover:shadow-md transition-shadow">
+                      <div
+                        key={assignment._id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => handleOpenAssignment(assignment._id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleOpenAssignment(assignment._id);
+                          }
+                        }}
+                        className="relative border border-gray-100 dark:border-slate-800/40 rounded-[28px] p-5 md:p-6 bg-white dark:bg-[#131B2E] flex flex-col group h-auto md:h-[210px] shadow-sm hover:shadow-md transition-shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#F57B36]/30"
+                      >
                         <div className="flex justify-between items-start mb-2 md:mb-4">
                           <h3 className="font-extrabold text-gray-900 dark:text-white text-[18px] md:text-[20px] tracking-tight truncate pr-8 mt-1">
                             {assignment.title || 'Quiz on Electricity'}

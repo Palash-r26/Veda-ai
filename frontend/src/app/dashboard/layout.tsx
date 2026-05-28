@@ -319,8 +319,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
         {/* ─── MOBILE BOTTOM NAV ────────────────────────────────────────────── */}
         <div className="md:hidden fixed bottom-0 left-0 w-full px-4 pb-6 pt-2 z-50 pointer-events-none">
-          <div className="flex flex-col items-end gap-4 w-full">
-            <nav className="w-full bg-[#1C1D21] dark:bg-[#131B2E] rounded-[32px] px-6 py-4 flex items-center justify-between shadow-2xl border border-slate-800/40 pointer-events-auto">
+          <div className="flex flex-col items-end gap-3 w-full">
+            <nav className="w-full bg-[#1C1D21] dark:bg-[#131B2E] rounded-[32px] px-5 py-4 flex items-center justify-between gap-3 shadow-2xl border border-slate-800/40 pointer-events-auto">
               <MobileNavItem icon={<Home size={20} />} label="Home" href="/dashboard" active={pathname === '/dashboard'} />
               <MobileNavItem icon={<Bell size={20} />} label="Alerts" href="/dashboard/notifications" active={pathname === '/dashboard/notifications'} />
               <MobileNavItem icon={<Settings size={20} />} label="Settings" href="/dashboard/settings" active={pathname === '/dashboard/settings'} />
@@ -329,6 +329,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 <MobileNavItem icon={<Shield size={20} />} label="Admin" href="/dashboard/admin/users" active={pathname?.includes('/admin/')} />
               )}
             </nav>
+            <button
+              onClick={toggleTheme}
+              className="pointer-events-auto w-12 h-12 rounded-full bg-[#1C1D21] dark:bg-[#131B2E] border border-slate-800/40 shadow-2xl flex items-center justify-center text-white dark:text-slate-200"
+              aria-label="Toggle theme"
+              title="Toggle theme"
+            >
+              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+            </button>
           </div>
         </div>
 
