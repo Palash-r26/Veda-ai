@@ -11,6 +11,7 @@ import { QuestionPaper } from '../models/QuestionPaper';
 import { generationQueue } from '../queue/queue';
 import { chunkText } from '../utils/textChunker';
 import { requireAuth, AuthRequest } from '../middleware/auth';
+import { logger } from '../utils/logger';
 
 const router = Router();
 
@@ -103,10 +104,20 @@ router.post('/', requireAuth, upload.single('file'), async (req: AuthRequest, re
         const extracted = await extractTextFromFile(req.file.path, req.file.originalname);
         sourceText = extracted.text;
         sourceChunks = extracted.chunks;
-        console.log(`[Upload] Extracted ${sourceText.length} chars, ${sourceChunks.length} RAG chunks from ${req.file.originalname}`);
-      } catch (parseErr) {
-        console.warn('[Upload] Failed to extract text from file:', parseErr);
+        logger.info(`[Upload] Extracted ${sourceText.length} chars, ${sourceChunks.length} RAG chunks from ${req.file.originalname}`);
+      } catch (parseErr: any) {
+        logger.warn(`[Upload] Failed to extract text from file: ${parseErr?.message || parseErr}`);
         // Non-fatal: continue without source material
+      } finally {
+        // Clean up the uploaded temporary file to prevent storage exhaustion
+        try {
+          if (fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+            logger.info(`[Upload] Cleaned up temporary file: ${req.file.path}`);
+          }
+        } catch (unlinkErr) {
+          logger.error(`[Upload] Failed to delete temporary file: ${req.file.path}`, unlinkErr);
+        }
       }
     }
 
@@ -143,7 +154,7 @@ router.post('/', requireAuth, upload.single('file'), async (req: AuthRequest, re
 
     res.status(201).json({ success: true, assignment, jobId: job.id });
   } catch (error) {
-    console.error('Failed to create assignment:', error);
+    logger.error('Failed to create assignment:', error);
     res.status(500).json({ success: false, error: 'Failed to create assignment' });
   }
 });

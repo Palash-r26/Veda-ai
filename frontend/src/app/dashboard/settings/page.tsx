@@ -30,7 +30,7 @@ export default function SettingsPage() {
   
   // AI States
   const [model, setModel] = useState('gemini-2.5-flash');
-  const [apiKey, setApiKey] = useState('AIzaSyA_wQgrw-bQt89GkVD-4B5dAuFoeCXDDsc');
+  const [apiKey, setApiKey] = useState('');
 
   // Theme States
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');

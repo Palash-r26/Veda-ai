@@ -1,16 +1,22 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { z } from 'zod';
+
 import assignmentRoutes from './routes/assignments';
 import paperRoutes from './routes/papers';
 import healthRoutes from './routes/health';
 import authRoutes from './routes/auth';
 import adminRoutes from './routes/admin';
 import notificationRoutes from './routes/notifications';
+
+import { logger } from './utils/logger';
+import { errorHandler } from './middleware/errorHandler';
 
 // Load env vars
 dotenv.config();
@@ -27,8 +33,8 @@ const EnvSchema = z.object({
 try {
   EnvSchema.parse(process.env);
 } catch (err: any) {
-  console.error("❌ CRITICAL ERROR: Environment validation failed:");
-  err.errors?.forEach((e: any) => console.error(` - ${e.path.join('.')}: ${e.message}`));
+  logger.error("❌ CRITICAL ERROR: Environment validation failed:");
+  err.errors?.forEach((e: any) => logger.error(` - ${e.path.join('.')}: ${e.message}`));
   process.exit(1); // Fail fast
 }
 
@@ -38,22 +44,56 @@ export const io = new Server(httpServer, {
   cors: { origin: '*' }
 });
 
+// ─── Trust Proxy & Security Headers ──────────────────────────────────────────
+// Necessary for express-rate-limit to work correctly behind reverse proxies (like Render/Nginx)
+app.set('trust proxy', 1);
+
+// Apply Helmet security headers
+app.use(helmet());
+
 app.use(cors());
 app.use(express.json());
 
+// ─── Rate Limiting Policies ──────────────────────────────────────────────────
+// General API Rate Limiter: 100 requests per 15 minutes
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many requests, please try again later.' }
+});
+
+// Stricter Auth Rate Limiter: 20 attempts per 15 minutes (protects login/register)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many authentication attempts. Please try again after 15 minutes.' }
+});
+
+// Apply general API rate limiter globally to all API routes
+app.use('/api/', apiLimiter);
+
+// ─── Routes Mounts ───────────────────────────────────────────────────────────
 app.use('/api/health', healthRoutes);
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes); // Strict rate limit on Auth
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/papers', paperRoutes);
+
+// ─── Global Error Handler ────────────────────────────────────────────────────
+// Must be registered after all route bindings
+app.use(errorHandler);
 
 const PORT = Number(process.env.PORT);
 const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/vedaai';
 
 mongoose.connect(mongoUri)
   .then(() => {
-    console.log('✅ Connected to MongoDB');
+    logger.info('✅ Connected to MongoDB');
 
     // Seed demo accounts if they don't exist
     const seedDemoAccounts = async () => {
@@ -88,16 +128,16 @@ mongoose.connect(mongoUri)
               passwordHash
             });
             await newUser.save();
-            console.log(`🌱 Seeded demo ${u.role} account: ${u.email} / ${u.password}`);
+            logger.info(`🌱 Seeded demo ${u.role} account: ${u.email} / ${u.password}`);
           } else {
             exists.passwordHash = passwordHash;
             exists.role = u.role;
             await exists.save();
-            console.log(`🌱 Synchronized demo ${u.role} account credentials: ${u.email} / ${u.password}`);
+            logger.info(`🌱 Synchronized demo ${u.role} account credentials: ${u.email} / ${u.password}`);
           }
         }
       } catch (err) {
-        console.error('❌ Failed to seed demo accounts:', err);
+        logger.error('❌ Failed to seed demo accounts:', err);
       }
     };
     seedDemoAccounts();
@@ -106,18 +146,17 @@ mongoose.connect(mongoUri)
     require('./queue/worker');
 
     httpServer.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+      logger.info(`🚀 Server running on port ${PORT}`);
     });
   })
   .catch(err => {
-    console.error('❌ MongoDB connection error:', err);
+    logger.error('❌ MongoDB connection error:', err);
     process.exit(1);
   });
 
 io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
+  logger.info(`Client connected: ${socket.id}`);
   socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
+    logger.info(`Client disconnected: ${socket.id}`);
   });
 });
-

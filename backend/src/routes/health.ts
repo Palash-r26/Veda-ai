@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import { GoogleGenAI } from '@google/genai';
 import Redis from 'ioredis';
 import { connection } from '../queue/queue'; // Redis connection
+import { requireAuth, AuthRequest } from '../middleware/auth';
+import { logger } from '../utils/logger';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -12,7 +14,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const redisClient = new Redis(connection);
 
 // ─── GET /api/health ─────────────────────────────────────────────────────────
-// General health check for DB and Redis
+// General health check for DB and Redis (No auth required, public monitoring)
 router.get('/', async (req: Request, res: Response) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   const redisStatus = redisClient.status === 'ready' ? 'connected' : redisClient.status;
@@ -30,8 +32,8 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // ─── GET /api/health/ai ──────────────────────────────────────────────────────
-// Specifically tests Gemini connectivity and token validity
-router.get('/ai', async (req: Request, res: Response) => {
+// Specifically tests Gemini connectivity and token validity (SECURED: requires auth)
+router.get('/ai', requireAuth, async (req: AuthRequest, res: Response) => {
   if (!process.env.GEMINI_API_KEY) {
     return res.status(500).json({
       status: 'error',
@@ -56,7 +58,7 @@ router.get('/ai', async (req: Request, res: Response) => {
       response: response.text?.trim()
     });
   } catch (error: any) {
-    console.error('[Health] AI health check failed:', error);
+    logger.error('[Health] AI health check failed:', error);
     res.status(502).json({
       status: 'error',
       message: 'Failed to connect to AI provider',

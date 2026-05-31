@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
 import { requireAuth, AuthRequest } from '../middleware/auth';
+import { logger } from '../utils/logger';
 
 const router = Router();
 
@@ -47,7 +48,7 @@ router.post('/register', async (req: Request, res: Response) => {
       user: { id: user.id, name: user.name, email: user.email, role: user.role }
     });
   } catch (error) {
-    console.error('Register error:', error);
+    logger.error('Register error:', error);
     res.status(500).json({ success: false, error: 'Registration failed' });
   }
 });
@@ -61,7 +62,7 @@ router.post('/check-email', async (req: Request, res: Response) => {
     const user = await User.findOne({ email });
     res.json({ success: true, exists: !!user });
   } catch (error) {
-    console.error('Check email error:', error);
+    logger.error('Check email error:', error);
     res.status(500).json({ success: false, error: 'Failed to check email' });
   }
 });
@@ -93,7 +94,7 @@ router.post('/login', async (req: Request, res: Response) => {
       user: { id: user.id, name: user.name, email: user.email, role: user.role }
     });
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error('Login error:', error);
     res.status(500).json({ success: false, error: 'Login failed' });
   }
 });
@@ -133,7 +134,7 @@ router.post('/change-password', requireAuth, async (req: AuthRequest, res: Respo
 
     res.json({ success: true, message: 'Password updated successfully!' });
   } catch (error) {
-    console.error('Change password error:', error);
+    logger.error('Change password error:', error);
     res.status(500).json({ success: false, error: 'Failed to change password' });
   }
 });

@@ -8,6 +8,7 @@ import { selectRelevantChunks, buildRagContext } from '../utils/textChunker';
 import { buildPrompt } from '../ai/prompts';
 import { io } from '../index';
 import { connection, deadLetterQueue } from './queue';
+import { logger } from '../utils/logger';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -34,7 +35,7 @@ export const generationWorker = new Worker(
   async (job: Job) => {
     const { assignmentId } = job.data;
     const startTime = Date.now();
-    console.log(`[Worker] Starting job ${job.id} for assignment ${assignmentId}`);
+    logger.info(`[Worker] Starting job ${job.id} for assignment ${assignmentId}`);
 
     // ── Step 1: Load assignment ───────────────────────────────────────────────
     emitProgress(job.id, assignmentId, 'Loading assignment details…', 5);
@@ -51,7 +52,7 @@ export const generationWorker = new Worker(
       const query = `${assignment.questionTypes.join(' ')} ${assignment.instructions}`;
       const relevantChunks = selectRelevantChunks(assignment.sourceChunks, query, 5);
       ragContext = buildRagContext(relevantChunks);
-      console.log(`[Worker] RAG: selected ${relevantChunks.length} of ${assignment.sourceChunks.length} chunks`);
+      logger.info(`[Worker] RAG: selected ${relevantChunks.length} of ${assignment.sourceChunks.length} chunks`);
     }
 
     // ── Step 3: Call Gemini ───────────────────────────────────────────────────
@@ -79,11 +80,11 @@ export const generationWorker = new Worker(
       validatedData = parseAndValidate(rawText);
     } catch (err) {
       if (err instanceof ZodError) {
-        console.error(`[Worker] Zod validation failed (attempt ${job.attemptsMade + 1}):`, err.flatten());
+        logger.error(`[Worker] Zod validation failed (attempt ${job.attemptsMade + 1}):`, err.flatten());
         throw new Error(`LLM output failed schema validation: ${err.issues.map(i => i.message).join('; ')}`);
       }
       if (err instanceof SyntaxError) {
-        console.error('[Worker] JSON parse failed:', rawText.slice(0, 200));
+        logger.error('[Worker] JSON parse failed:', rawText.slice(0, 200));
         throw new Error('LLM returned malformed JSON');
       }
       throw err;
@@ -122,7 +123,7 @@ export const generationWorker = new Worker(
       durationMs,
     });
 
-    console.log(`[Worker] Job ${job.id} complete in ${durationMs}ms | tokens: ${promptTokens + completionTokens}`);
+    logger.info(`[Worker] Job ${job.id} complete in ${durationMs}ms | tokens: ${promptTokens + completionTokens}`);
     return { success: true, paperId: paper._id };
   },
   {
@@ -141,10 +142,10 @@ generationWorker.on('failed', async (job, err) => {
   const { assignmentId } = job.data;
   const isExhausted = job.attemptsMade >= (job.opts.attempts ?? 1);
 
-  console.error(`[Worker] Job ${job.id} failed (attempt ${job.attemptsMade}):`, err.message);
+  logger.error(`[Worker] Job ${job.id} failed (attempt ${job.attemptsMade}):`, err);
 
   if (isExhausted) {
-    console.error(`[Worker] Job ${job.id} exhausted all retries — moving to DLQ`);
+    logger.error(`[Worker] Job ${job.id} exhausted all retries — moving to DLQ`);
 
     // Move to Dead Letter Queue for inspection / manual replay
     await deadLetterQueue.add('failed-job', {
@@ -170,5 +171,5 @@ generationWorker.on('failed', async (job, err) => {
 });
 
 generationWorker.on('error', (err) => {
-  console.error('[Worker] Worker-level error:', err.message);
+  logger.error('[Worker] Worker-level error:', err);
 });
